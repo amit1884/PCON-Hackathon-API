@@ -2,7 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose');
 
 const Scholarship = require('../Model/Info');
-
+const FuzzySearch=require('fuzzy-search')
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -84,4 +84,26 @@ router.get('/ugc', async(req,res)=>{
         data:infoes
     })
 })
+
+//Search Scholarship
+
+router.get('/search',(req,res)=>{
+
+    var text=req.query.text;
+    if(text!=='')
+    {
+    Scholarship.find({})
+    .then(foundscholarship=>{
+        const searcher = new FuzzySearch(foundscholarship, ['Type','From','title'], {
+            caseSensitive: false,
+        })
+        const scholar=searcher.search(text)
+        res.json({scholar})
+    })
+    .catch(err=>console.log(err))
+    }
+    
+})
+
+
 module.exports = router;
